@@ -1,18 +1,9 @@
 
-"""
-15-Puzzle O'yini - Python / Tkinter
-====================================
-Ishga tushirish: python puzzle15.py
-Talablar: Python 3.x (tkinter standart kutubxona)
-"""
-
 import tkinter as tk
 from tkinter import messagebox, font
 import random
 import time
 
-
-# ─── Konstantalar ─────────────────────────────────────────────────────────────
 GRID = 4
 TILE_SIZE = 110
 PAD = 8
@@ -31,15 +22,13 @@ HEADER_TEXT   = "#e94560"
 INFO_TEXT     = "#a8b2d8"
 WIN_COLOR     = "#4ade80"
 
-
-# ─── O'yin logikasi ────────────────────────────────────────────────────────────
 class PuzzleModel:
     def __init__(self, size=4):
         self.size = size
         self.reset()
 
     def reset(self):
-        self.board = list(range(1, self.size * self.size)) + [0]  # 0 = bo'sh joy
+        self.board = list(range(1, self.size * self.size)) + [0]  
         self.moves = 0
         self.start_time = None
         self.finished = False
@@ -49,13 +38,13 @@ class PuzzleModel:
         return self.board.index(0)
 
     def _shuffle(self):
-        """Hal qilish mumkin bo'lgan tartibsiz holat hosil qilish."""
+    
         for _ in range(1000):
             zero = self._find_zero()
             neighbors = self._get_neighbors(zero)
             swap = random.choice(neighbors)
             self.board[zero], self.board[swap] = self.board[swap], self.board[zero]
-        # Agar tasodifan yechilgan bo'lsa, yana aralash
+        
         while self.is_solved():
             self._shuffle()
 
@@ -73,7 +62,7 @@ class PuzzleModel:
         return tile_pos in self._get_neighbors(zero)
 
     def move_tile(self, tile_pos):
-        """Plitani siljitadi. Muvaffaqiyatli bo'lsa True qaytaradi."""
+       
         if not self.can_move(tile_pos):
             return False
         zero = self._find_zero()
@@ -97,7 +86,6 @@ class PuzzleModel:
         return self.board[row * self.size + col]
 
 
-# ─── Grafik interfeys ──────────────────────────────────────────────────────────
 class PuzzleApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -109,18 +97,15 @@ class PuzzleApp(tk.Tk):
         self._draw_board()
         self._tick()
 
-    # ── UI qurilishi ────────────────────────────────────────────────────────────
     def _build_ui(self):
         bold_font  = font.Font(family="Segoe UI", size=14, weight="bold")
         title_font = font.Font(family="Segoe UI", size=22, weight="bold")
         info_font  = font.Font(family="Segoe UI", size=12)
         btn_font   = font.Font(family="Segoe UI", size=11, weight="bold")
 
-        # Sarlavha
         tk.Label(self, text="15 PUZZLE", font=title_font,
                  bg=BG_COLOR, fg=HEADER_TEXT).pack(pady=(18, 4))
 
-        # Ma'lumot paneli
         info_frame = tk.Frame(self, bg=BG_COLOR)
         info_frame.pack(fill="x", padx=24, pady=4)
 
@@ -132,7 +117,6 @@ class PuzzleApp(tk.Tk):
         tk.Label(info_frame, textvariable=self.time_var,
                  font=info_font, bg=BG_COLOR, fg=INFO_TEXT).pack(side="right")
 
-        # Taxtacha
         board_size = GRID * TILE_SIZE + (GRID + 1) * PAD
         self.canvas = tk.Canvas(self, width=board_size, height=board_size,
                                 bg=BOARD_BG, highlightthickness=0,
@@ -143,7 +127,6 @@ class PuzzleApp(tk.Tk):
 
         self._hover_pos = None
 
-        # Tugmalar
         btn_frame = tk.Frame(self, bg=BG_COLOR)
         btn_frame.pack(pady=12)
 
@@ -157,7 +140,6 @@ class PuzzleApp(tk.Tk):
                   activeforeground="white", relief="flat", padx=18, pady=8,
                   cursor="hand2", command=self._show_solution).pack(side="left", padx=8)
 
-    # ── Taxtacha chizish ────────────────────────────────────────────────────────
     def _draw_board(self):
         self.canvas.delete("all")
         self._tile_rects = {}
@@ -172,26 +154,23 @@ class PuzzleApp(tk.Tk):
                 pos = row * GRID + col
 
                 if val == 0:
-                    # Bo'sh katak
                     self.canvas.create_rectangle(x1, y1, x2, y2,
                                                  fill=EMPTY_COLOR, outline="",
                                                  tags=f"cell_{pos}")
                     continue
-
-                # Rang: hover yoki oddiy
+                
                 color = TILE_HOVER if pos == self._hover_pos and self.model.can_move(pos) \
                         else TILE_COLOR
 
-                # Plita foni (yumaloq burchak effekti uchun ikki to'rtburchak)
                 r = self.canvas.create_rectangle(x1+4, y1+4, x2-4, y2-4,
                                                  fill=color, outline="",
                                                  tags=f"cell_{pos}")
-                # Yorug' chegara
+               
                 self.canvas.create_rectangle(x1+4, y1+4, x2-4, y2-4,
                                              fill="", outline="#2a4a7f",
                                              width=2, tags=f"cell_{pos}")
 
-                # Raqam
+                
                 cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
                 fsize = 28 if val < 10 else 22
                 self.canvas.create_text(cx, cy, text=str(val),
@@ -202,9 +181,7 @@ class PuzzleApp(tk.Tk):
 
         self.moves_var.set(f"Harakatlar: {self.model.moves}")
 
-    # ── Hodisalar ───────────────────────────────────────────────────────────────
     def _pos_from_xy(self, x, y):
-        """Canvas koordinatasidan taxtacha pozitsiyasiga."""
         col = (x - PAD) // (TILE_SIZE + PAD)
         row = (y - PAD) // (TILE_SIZE + PAD)
         if 0 <= row < GRID and 0 <= col < GRID:
@@ -239,7 +216,6 @@ class PuzzleApp(tk.Tk):
             self.time_var.set(f"Vaqt: {s}s")
         self.after(1000, self._tick)
 
-    # ── Qo'shimcha funksiyalar ──────────────────────────────────────────────────
     def _new_game(self):
         self._hover_pos = None
         self.model.reset()
@@ -256,8 +232,6 @@ class PuzzleApp(tk.Tk):
         messagebox.showinfo("G'ALABA!", msg)
 
     def _show_solution(self):
-        """Yechimni ko'rsatish: A* algoritmini oddiy versiyasi."""
-        # Kichik taxtacha uchun BFS, 4x4 uchun hint beramiz
         messagebox.showinfo(
             "Maslahat 💡",
             "15-Puzzle yechim strategiyasi:\n\n"
@@ -270,7 +244,6 @@ class PuzzleApp(tk.Tk):
         )
 
 
-# ─── Dasturni ishga tushirish ──────────────────────────────────────────────────
 if __name__ == "__main__":
     app = PuzzleApp()
     app.mainloop()
